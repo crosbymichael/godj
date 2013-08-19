@@ -18,6 +18,7 @@ type Event struct {
 	Description []string // Event description
 	Overlap     int      // Event's overlapping Event
 	isComplete  bool
+	journalPath string
 }
 
 func DeserializeEvent(id int, r io.Reader) (*Event, error) {

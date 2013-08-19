@@ -13,8 +13,8 @@ func debug(format string, v ...interface{}) {
 	log.Printf(format, v...)
 }
 
-func readHint(j *Journal) (int, error) {
-	hint, err := os.Open(path.Join(j.FullPath(), HINT))
+func readHint(rootPath string) (int, error) {
+	hint, err := os.Open(path.Join(fullPath(rootPath), HINT))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return 0, nil
@@ -28,8 +28,8 @@ func readHint(j *Journal) (int, error) {
 	return strconv.Atoi(string(raw))
 }
 
-func writeHint(j *Journal) error {
-	length := []byte(strconv.Itoa(j.hint))
-	p := path.Join(j.FullPath(), HINT)
+func writeHint(rootPath string, hint int) error {
+	length := []byte(strconv.Itoa(hint))
+	p := path.Join(fullPath(rootPath), HINT)
 	return ioutil.WriteFile(p, length, JOURNALPERMISSION)
 }

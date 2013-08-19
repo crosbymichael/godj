@@ -9,19 +9,18 @@ import (
 )
 
 func simple() {
-	journal, _ := godj.NewJournal("/home/vagrant/docker")
-	event, _ := journal.NewEvent([]string{"RUN", "apt-get", "upgrade", "-y"})
-
-	journal.CloseEvent(event)
-
-	journal.Close()
+	event, _ := godj.NewEvent("/home/vagrant/docker", "RUN", "apt-get", "upgrade", "-y")
+	godj.Close(event)
 }
 
 func main() {
 	save := flag.Bool("s", false, "Save the data")
 	flag.Parse()
 
-	journal := newJournal()
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
 
 	if *save {
 		// print out errors
@@ -37,11 +36,11 @@ func main() {
 			group.Add(1)
 			go func() {
 				for j := 0; j < 50; j++ {
-					event, err := journal.NewEvent([]string{"echo", "test", ">", "test.txt"})
+					event, err := godj.NewEvent(cwd, "TEST", "echo", "test", ">", "test.txt")
 					if err != nil {
 						c <- err
 					}
-					if err := journal.CloseEvent(event); err != nil {
+					if err := godj.Close(event); err != nil {
 						c <- err
 					}
 				}
@@ -53,29 +52,14 @@ func main() {
 
 		close(c)
 	} else {
-		readEvents(journal)
+		readEvents(cwd)
 	}
 
 	fmt.Println("Done...")
-	if err := journal.Close(); err != nil {
-		panic(err)
-	}
 }
 
-func newJournal() *godj.Journal {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	journal, err := godj.NewJournal(wd)
-	if err != nil {
-		panic(err)
-	}
-	return journal
-}
-
-func readEvents(journal *godj.Journal) {
-	events, err := journal.Overlapping()
+func readEvents(cwd string) {
+	events, err := godj.Overlapping(cwd)
 	if err != nil {
 		panic(err)
 	}
