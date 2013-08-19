@@ -146,6 +146,10 @@ func Events(rootPath string) ([]*Event, error) {
 	if len(errs) > 0 {
 		return nil, <-errs
 	}
+	if err = writeHint(rootPath, len(out)); err != nil {
+		return nil, err
+	}
+
 	return Sort(out), nil
 }
 
