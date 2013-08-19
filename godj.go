@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrEventDoesNotExist = errors.New("Event does not exist")
+	ErrEventIsNil        = errors.New("Cannot close a nil event")
 	hints                = make(map[string]int)
 	activeEvents         = make(map[string]*Event)
 	workerCount          = 5
@@ -33,6 +34,7 @@ func NewEvent(rootPath, action string, args ...string) (*Event, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer fp.Close()
 	event := &Event{Description: append([]string{action}, args...), Id: id, Overlap: -1, journalPath: rootPath}
 	if ae, exists := activeEvents[rootPath]; exists {
 		event.Overlap = ae.Id
@@ -46,6 +48,9 @@ func NewEvent(rootPath, action string, args ...string) (*Event, error) {
 }
 
 func Close(event *Event) error {
+	if event == nil {
+		return ErrEventIsNil
+	}
 	if event.isComplete {
 		return nil
 	}

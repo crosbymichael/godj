@@ -39,6 +39,7 @@ func main() {
 					event, err := godj.NewEvent(cwd, "TEST", "echo", "test", ">", "test.txt")
 					if err != nil {
 						c <- err
+						continue
 					}
 					if err := godj.Close(event); err != nil {
 						c <- err
